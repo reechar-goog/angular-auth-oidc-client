@@ -4,9 +4,10 @@ import { HttpBaseService } from './api/http-base.service';
 import { AuthStateService } from './authState/auth-state.service';
 import { ConfigurationProvider, OidcConfigService } from './config';
 import { EventsService } from './events';
-import { CheckSessionService } from './iframeServices/check-session.service';
-import { IFrameService } from './iframeServices/existing-iframe.service';
-import { SilentRenewService } from './iframeServices/silent-renew.service';
+import { CheckSessionService } from './iframe/check-session.service';
+import { IFrameService } from './iframe/existing-iframe.service';
+import { IFrameService2 } from './iframe/iframe.service';
+import { SilentRenewService } from './iframe/silent-renew.service';
 import { LoggerService } from './logging/logger.service';
 import { TokenHelperService } from './services/oidc-token-helper.service';
 import { OidcSecurityService } from './services/oidc.security.service';
@@ -42,6 +43,7 @@ export class AuthModule {
                 TokenHelperService,
                 LoggerService,
                 IFrameService,
+                IFrameService2,
                 EqualityService,
                 DataService,
                 StateValidationService,

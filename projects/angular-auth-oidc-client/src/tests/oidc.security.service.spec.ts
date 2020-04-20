@@ -7,7 +7,7 @@ import { filter, skipWhile } from 'rxjs/operators';
 import { OpenIdConfiguration } from '../lib/angular-auth-oidc-client';
 import { AuthModule } from '../lib/auth.module';
 import { ConfigurationProvider } from '../lib/config';
-import { IFrameService } from '../lib/iframeServices/existing-iframe.service';
+import { IFrameService } from '../lib/iframe/existing-iframe.service';
 import { LoggerService } from '../lib/logging/logger.service';
 import { LoggerServiceMock } from '../lib/logging/logger.service-mock';
 import { OidcSecurityService } from '../lib/services/oidc.security.service';
@@ -163,7 +163,7 @@ xdescribe('OidcSecurityService', () => {
         spyOn(oidcSecurityService as any, 'refreshTokensWithCodeProcedure').and.returnValue(of(true));
         spyOn(storagePersistanceService as any, 'getRefreshToken').and.returnValue('refresh token');
 
-        oidcSecurityService.refreshSession().subscribe(() => {
+        oidcSecurityService.startRefreshSession().subscribe(() => {
             expect(storagePersistanceService.silentRenewRunning).toBe('running');
         });
     }));

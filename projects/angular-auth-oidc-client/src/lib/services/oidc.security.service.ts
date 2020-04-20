@@ -3,14 +3,14 @@ import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { oneLineTrim } from 'common-tags';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { DataService } from '../api/data.service';
 import { AuthStateService } from '../authState/auth-state.service';
 import { AuthorizedState } from '../authState/authorized-state';
 import { ConfigurationProvider } from '../config';
 import { EventTypes } from '../events';
 import { EventsService } from '../events/events.service';
-import { CheckSessionService, SilentRenewService } from '../iframeServices';
+import { CheckSessionService, SilentRenewService } from '../iframe';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistanceService } from '../storage';
 import { UserService } from '../userData/user-service';
@@ -74,10 +74,6 @@ export class OidcSecurityService {
         const isAuthenticated = this.authStateService.isAuthStorageTokenValid();
         // validate storage and @@set authorized@@ if true
         if (isAuthenticated) {
-            if (this.silentRenewShouldBeUsed()) {
-                this.initSilentRenew();
-            }
-
             this.authStateService.setAuthorizedAndFireEvent();
 
             this.startTokenValidationPeriodically();
@@ -97,15 +93,6 @@ export class OidcSecurityService {
         return (
             !this.configurationProvider.openIDConfiguration.useRefreshToken && this.configurationProvider.openIDConfiguration.silentRenew
         );
-    }
-
-    private initSilentRenew() {
-        // module setup (not refresh tokens)
-        // init silent renew
-        this.silentRenewService.init();
-        this.silentRenewService.silentRenewResult$.subscribe((detail) => {
-            this.silentRenewEventHandler(detail);
-        });
     }
 
     private isCheckSessionConfigured() {
@@ -517,7 +504,7 @@ export class OidcSecurityService {
     }
 
     // this is not an observable as return
-    refreshSession(): Observable<boolean> {
+    startRefreshSession(): Observable<boolean> {
         if (
             !this.configurationProvider.openIDConfiguration.silentRenewUrl ||
             this.configurationProvider.openIDConfiguration.useRefreshToken
@@ -589,7 +576,9 @@ export class OidcSecurityService {
         return this.authStateService.authorized$.pipe(
             switchMap((isAuthorized) => {
                 if (isAuthorized) {
-                    return this.silentRenewService.sendAuthorizeReqestUsingSilentRenew(url);
+                    return this.silentRenewService
+                        .sendAuthorizeReqestUsingSilentRenew(url)
+                        .pipe(tap((detail) => this.silentRenewEventHandler(detail)));
                 }
                 return of(null);
             }),
@@ -728,7 +717,7 @@ export class OidcSecurityService {
                     this.loggerService.logDebug('IsAuthorized: id_token isTokenExpired, start silent renew if active');
 
                     if (this.configurationProvider.openIDConfiguration.silentRenew) {
-                        this.refreshSession().subscribe(
+                        this.startRefreshSession().subscribe(
                             () => {
                                 this.scheduledHeartBeatInternal = setTimeout(silentRenewHeartBeatCheck, 3000);
                             },
@@ -761,7 +750,7 @@ export class OidcSecurityService {
     }
 
     private silentRenewEventHandler(detail: any) {
-        console.warn('@@@@@@ silentRenewEventHandler event');
+        console.warn('@@@@@@ silentRenewEventHandler event', detail);
         if (!detail) {
             console.warn('@@@@@@ silentRenewEventHandler NO detail');
             return;

@@ -6,10 +6,10 @@ export class IFrameService {
     constructor(private loggerService: LoggerService) {}
 
     getExistingIFrame(identifier: string): HTMLIFrameElement | null {
-        const iFrameOnParent = this.getIFrameFromParentWindow(identifier);
-        if (this.isIFrameElement(iFrameOnParent)) {
-            return iFrameOnParent;
-        }
+        // const iFrameOnParent = this.getIFrameFromParentWindow(identifier);
+        // if (this.isIFrameElement(iFrameOnParent)) {
+        //     return iFrameOnParent;
+        // }
         const iFrameOnSelf = this.getIFrameFromWindow(identifier);
         if (this.isIFrameElement(iFrameOnSelf)) {
             return iFrameOnSelf;
@@ -26,17 +26,17 @@ export class IFrameService {
         return sessionIframe;
     }
 
-    private getIFrameFromParentWindow(identifier: string): HTMLIFrameElement | null {
-        try {
-            const iFrameElement = window.parent.document.getElementById(identifier);
-            if (this.isIFrameElement(iFrameElement)) {
-                return iFrameElement;
-            }
-            return null;
-        } catch (e) {
-            return null;
-        }
-    }
+    // private getIFrameFromParentWindow(identifier: string): HTMLIFrameElement | null {
+    //     try {
+    //         const iFrameElement = window.parent.document.getElementById(identifier);
+    //         if (this.isIFrameElement(iFrameElement)) {
+    //             return iFrameElement;
+    //         }
+    //         return null;
+    //     } catch (e) {
+    //         return null;
+    //     }
+    // }
 
     private getIFrameFromWindow(identifier: string): HTMLIFrameElement | null {
         const iFrameElement = window.document.getElementById(identifier);
