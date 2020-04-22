@@ -259,7 +259,7 @@ export class OidcSecurityService {
     }
 
     // Code Flow with PCKE or Implicit Flow
-    authorize(urlHandler?: (url: string) => any) {
+    authorize(urlHandler?: (url: string) => any, nonceInput? :string) {
         if (this.configurationProvider.wellKnownEndpoints) {
             this.authWellKnownEndpointsLoaded = true;
         }
@@ -283,8 +283,13 @@ export class OidcSecurityService {
             state = Date.now() + '' + Math.random() + Math.random();
             this.oidcSecurityCommon.authStateControl = state;
         }
+        let nonce: string;
+        if(nonceInput){
+            nonce = nonceInput
+        } else {
+            nonce = 'N' + Math.random() + '' + Date.now();
+        }
 
-        const nonce = 'N' + Math.random() + '' + Date.now();
         this.oidcSecurityCommon.authNonce = nonce;
         this.loggerService.logDebug('AuthorizedController created. local state: ' + this.oidcSecurityCommon.authStateControl);
 
